@@ -1,4 +1,3 @@
-
 use std::time::Instant;
 use pedersen_example::*;
 use ark_serialize::CanonicalDeserialize;
@@ -8,123 +7,121 @@ use ark_crypto_primitives::{commitment::pedersen::Randomness, SNARK};
 use ark_bls12_381::Bls12_381;
 use pedersen_example::full_circuit::convert_2d_vector_into_1d;
 
-
 fn main() {
     let mut rng = rand::thread_rng();
 
-    println!("LeNet optimized medium on face dataset");
+    println!("LeNet optimized medium on CIFAR dataset");
 
     let x: Vec<Vec<Vec<Vec<u8>>>> = read_vector4d(
-        "pretrained_model/LeNet_ORL_pretrained/X_q.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/X_q.txt".to_string(),
         1,
-        1,
-        56,
-        46,
+        3,
+        32,
+        32,
     ); // only read one image
     let conv1_w: Vec<Vec<Vec<Vec<u8>>>> = read_vector4d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv1_weight_q.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv1_weight_q.txt".to_string(),
         32,
-        1,
+        3,
         5,
         5,
     );
     let conv2_w: Vec<Vec<Vec<Vec<u8>>>> = read_vector4d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv2_weight_q.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv2_weight_q.txt".to_string(),
         64,
         32,
         5,
         5,
     );
     let conv3_w: Vec<Vec<Vec<Vec<u8>>>> = read_vector4d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv3_weight_q.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv3_weight_q.txt".to_string(),
         256,
         64,
         4,
         4,
     );
     let fc1_w: Vec<Vec<u8>> = read_vector2d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_linear1_weight_q.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_linear1_weight_q.txt".to_string(),
         128,
-        256 * 5 * 8,
+        1024,
     );
     let fc2_w: Vec<Vec<u8>> = read_vector2d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_linear2_weight_q.txt".to_string(),
-        40,
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_linear2_weight_q.txt".to_string(),
+        10,
         128,
     );
 
     let x_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/X_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/X_z.txt".to_string(),
         1,
     );
     let conv1_output_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv1_output_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv1_output_z.txt".to_string(),
         1,
     );
     let conv2_output_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv2_output_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv2_output_z.txt".to_string(),
         1,
     );
     let conv3_output_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv3_output_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv3_output_z.txt".to_string(),
         1,
     );
     let fc1_output_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_linear1_output_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_linear1_output_z.txt".to_string(),
         1,
     );
     let fc2_output_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_linear2_output_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_linear2_output_z.txt".to_string(),
         1,
     );
 
     let conv1_weights_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv1_weight_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv1_weight_z.txt".to_string(),
         1,
     );
     let conv2_weights_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv2_weight_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv2_weight_z.txt".to_string(),
         1,
     );
     let conv3_weights_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv3_weight_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv3_weight_z.txt".to_string(),
         1,
     );
     let fc1_weights_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_linear1_weight_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_linear1_weight_z.txt".to_string(),
         1,
     );
     let fc2_weights_0: Vec<u8> = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_linear2_weight_z.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_linear2_weight_z.txt".to_string(),
         1,
     );
 
     let multiplier_conv1: Vec<f32> = read_vector1d_f32(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv1_weight_s.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv1_weight_s.txt".to_string(),
         32,
     );
     let multiplier_conv2: Vec<f32> = read_vector1d_f32(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv2_weight_s.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv2_weight_s.txt".to_string(),
         64,
     );
     let multiplier_conv3: Vec<f32> = read_vector1d_f32(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_conv3_weight_s.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_conv3_weight_s.txt".to_string(),
         256,
     );
 
     let multiplier_fc1: Vec<f32> = read_vector1d_f32(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_linear1_weight_s.txt".to_string(),
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_linear1_weight_s.txt".to_string(),
         128,
     );
     let multiplier_fc2: Vec<f32> = read_vector1d_f32(
-        "pretrained_model/LeNet_ORL_pretrained/LeNet_Medium_linear2_weight_s.txt".to_string(),
-        40,
+        "pretrained_model/LeNet_CIFAR_pretrained/LeNet_Medium_linear2_weight_s.txt".to_string(),
+        10,
     );
 
-    let person_feature_vector = read_vector1d(
-        "pretrained_model/LeNet_ORL_pretrained/person_feature_vector.txt".to_string(),
-        40,
-    );
+    // println!("x_0 {}\n conv_output_0 {} {} {}\n fc_output_0 {} {}\n conv_w_0 {} {} {}\n fc_w_0 {} {}\n",
+    //         x_0[0], conv1_output_0[0], conv2_output_0[0], conv3_output_0[0],  fc1_output_0[0],  fc2_output_0[0],
+    //         conv1_weights_0[0], conv2_weights_0[0], conv3_weights_0[0], fc1_weights_0[0], fc2_weights_0[0]);
 
     println!("finish reading parameters");
 
@@ -188,11 +185,10 @@ fn main() {
     let end = Instant::now();
     println!("commit time {:?}", end.duration_since(begin));
 
-    let is_the_same_person: bool =
-        cosine_similarity(z[0].clone(), person_feature_vector.clone(), 50);
-    println!("is the same person ? {}", is_the_same_person);
+    //we only do one image in zk proof.
+    let classification_res = argmax_u8(z[0].clone());
 
-    let full_circuit = LeNetCircuitU8OptimizedLv3PedersenRecognition {
+    let full_circuit = LeNetCircuitU8OptimizedLv3PedersenClassification {
         params: param.clone(),
         x: x.clone(),
         x_com: x_com.clone(),
@@ -213,7 +209,6 @@ fn main() {
         fc2_weights: fc2_w.clone(),
         fc2_open: fc2_open.clone(),
         fc2_com_vec: fc2_com_vec.clone(),
-
         //zero points for quantization.
         x_0: x_0[0],
         conv1_output_0: conv1_output_0[0],
@@ -238,12 +233,8 @@ fn main() {
         z: z.clone(),
         z_open: z_open,
         z_com: z_com,
-        person_feature_vector: person_feature_vector.clone(),
-        threshold: 50,
-        result: is_the_same_person,
+        argmax_res: classification_res,
     };
-
-
 
     println!("start generating random parameters");
     let begin = Instant::now();
@@ -255,9 +246,9 @@ fn main() {
     let end = Instant::now();
     println!("setup time {:?}", end.duration_since(begin));
 
-    // let mut buf = vec![];
-    // param.serialize(&mut buf).unwrap();
-    // println!("crs size: {}", buf.len());
+    let mut buf = vec![];
+    param.serialize(&mut buf).unwrap();
+    println!("crs size: {}", buf.len());
 
     let pvk = prepare_verifying_key(&param.vk);
     println!("random parameters generated!\n");
